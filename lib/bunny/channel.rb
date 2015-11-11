@@ -1515,8 +1515,18 @@ module Bunny
     # @api plugin
     def recover_confirm_mode
       if using_publisher_confirmations?
+        clear_unconfirmed_set
         @delivery_tag_offset = @next_publish_seq_no - 1
         confirm_select(@confirms_callback)
+      end
+    end
+
+    # Clears unconfirmed_set after network recovery. All future calls to
+    # wait_for_confirms will fail otherwise.
+    #
+    def clear_unconfirmed_set
+      @unconfirmed_set_mutex.synchronize do
+        @unconfirmed_set.clear
       end
     end
 
